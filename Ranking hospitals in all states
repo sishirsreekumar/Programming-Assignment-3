@@ -1,0 +1,35 @@
+rankall <- function(outcome , number) {
+  x <- read.csv("outcome-of-care-measures.csv", colClasses = "character", na.strings = "Not Available")
+  states <- unique(x$State)
+  if(! outcome %in% c("heart attack","heart failure","pneumonia" ))
+  {stop("Invalid outcome")}
+  hospital <- vector()
+  for (i in seq_along(states))
+  {   if (outcome == "heart attack") 
+      {result <- x[x$State==states[i],c(2,7,11)]}
+      else if (outcome == "heart failure")
+      {result <- x[x$State==states[i],c(2,7,17)]}
+      else 
+      {result <- x[x$State==states[i],c(2,7,23)]}
+      result <- na.omit(result)
+      result[,3]<- as.numeric(result[,3])
+      if (is.numeric(number))
+      {
+        sorted <- result[order(result[,3], result[,1],decreasing = FALSE),]
+        sorted <- sorted[number,]
+      }
+      else if (number=="best")
+      {
+        sorted <- result[order(result[,3], result[,1],decreasing = FALSE),]
+      }
+      else if (number=="worst")
+      {
+        sorted <- result[order(result[,3], result[,1],decreasing = TRUE),]
+      }
+      hospital <- append(hospital, c(sorted[1,1], states[i]))
+  }
+  hospital_output <- as.data.frame(matrix(hospital, nrow= length(hospital)/2, ncol = 2 , byrow = TRUE))
+  
+  colnames(hospital_output) <- c("hospital", "state") 
+  return(hospital_output)
+}
